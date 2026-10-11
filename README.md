@@ -1,186 +1,226 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Download README.md</title>
-  </head>
-  <body>
-    <a id="download-link" href="#" download="README.md">Download README.md</a>
-    <script>
-      // The content of the README file in Markdown format
-      const readmeContent = `# CarbonTrack 1 🌍
+# CarbonTrack
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/THE-DEEPDAS/carbontrack_1/ci.yml?branch=main)](https://github.com/THE-DEEPDAS/carbontrack_1/actions)
+CarbonTrack is a web application for tracking personal and organizational sustainability activity. Users can record lifestyle and transport information, review carbon-footprint dashboards, explore sustainability recommendations, and participate in certificate and voucher workflows. Organization accounts can manage departments and offer incentives; administrator screens support user and certificate oversight.
 
-CarbonTrack 1 is a sleek web application designed to **track and visualize CO₂ emissions** in real-time. Built with modern web technologies and deployed on [Vercel](https://vercel.com), CarbonTrack 1 helps you gain insights into environmental data with an interactive and responsive interface.
+This repository contains two separately deployed applications:
 
----
+- `frontend/` - React single-page application built with Vite.
+- `backend/` - Express REST API backed by MongoDB.
 
-## Table of Contents
+## Contents
 
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Live Demo](#live-demo)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [Contributing](#contributing)
-- [License](#license)
-- [Acknowledgements](#acknowledgements)
+- [Features and user flows](#features-and-user-flows)
+- [Technology](#technology)
+- [Repository layout](#repository-layout)
+- [Prerequisites](#prerequisites)
+- [Install and run locally](#install-and-run-locally)
+- [Environment variables](#environment-variables)
+- [Build and deploy](#build-and-deploy)
+- [API overview](#api-overview)
+- [Troubleshooting](#troubleshooting)
 
----
+## Features and user flows
 
-## Features 🚀
+CarbonTrack provides role-oriented screens for three account types:
 
-- **Real-Time Data Visualization:** Enjoy interactive charts and graphs that update in real time.
-- **Responsive Design:** Optimized for desktops, tablets, and mobile devices.
-- **Clean User Interface:** An intuitive UI that makes exploring data a breeze.
-- **Interactive Components:** Engaging UI elements for deeper insights into environmental metrics.
-- **Open Source:** Fully transparent code available on GitHub for contributions and customizations.
+### Individual users
 
----
+1. Create an account and sign in at `/signup` or `/login`.
+2. Complete the sustainability profile form.
+3. Visit the dashboard to review recorded user data, emissions visualizations, comparisons, and available vouchers.
+4. Use Monitoring and Analysis for environmental charts, recommendations, and product-impact analysis.
+5. Track certificate goals, upload proof, and download certificates when available.
 
-## Tech Stack 🛠
+The client stores the authentication token in browser `localStorage` and sends it as a Bearer token to protected API routes.
 
-- **Frontend:** React (or Next.js) for a dynamic and performant UI.
-- **Backend/API:** Serverless functions and API integrations for real-time data.
-- **Styling:** Modern CSS frameworks and libraries to keep your code clean and scalable.
-- **Deployment:** Hosted on Vercel for seamless CI/CD and global delivery.
+### Organization accounts
 
----
+Organization users have an organization dashboard with department data, reporting, and voucher-management screens. The API supports department creation, deletion and JSON report export, as well as offering vouchers.
 
-## Live Demo 🎥
+### Administrators
 
-Check out the live demo of CarbonTrack 1:  
-[https://carbontrack1.vercel.app](https://carbontrack1.vercel.app)
+Administrator screens provide user and organization views and certificate-goal verification workflows.
 
----
+Some dashboards include sample or locally generated visualization data. Integrations such as MongoDB, Gemini, and Cloudinary require the credentials described below to provide their corresponding functionality.
 
-## Installation 💻
+## Technology
 
-Follow these steps to run CarbonTrack 1 locally:
+### Frontend
 
-1. **Clone the Repository:**
+- React 18
+- Vite 5 and `@vitejs/plugin-react`
+- React Router for client-side navigation
+- Zustand for persisted authentication state
+- Axios and Fetch for HTTP requests
+- Tailwind CSS, CSS modules/styles, and Framer Motion
+- Chart.js, `react-chartjs-2`, and Recharts for charts
+- Google Generative AI SDK for browser-side Gemini features
+- jsPDF and jsPDF AutoTable for document generation
 
-   \`\`\`bash
-   git clone https://github.com/THE-DEEPDAS/carbontrack_1.git
-   cd carbontrack_1
-   \`\`\`
+### Backend
 
-2. **Install Dependencies:**
+- Node.js ES modules (use Node 18.12+ or Node 20.9+; the `canvas` dependency declares this requirement)
+- Express 4 and Mongoose 8
+- MongoDB for users, departments, certificates, vouchers, and analysis history
+- JSON Web Tokens and bcryptjs for authentication/password handling
+- Multer for in-memory image and proof uploads
+- Cloudinary for uploaded media
+- Google Generative AI for server-side product image analysis
 
-   Using npm:
-   \`\`\`bash
-   npm install
-   \`\`\`
-   Or with Yarn:
-   \`\`\`bash
-   yarn install
-   \`\`\`
+## Repository layout
 
-3. **Setup Environment Variables:**
+```text
+.
+├── frontend/
+│   ├── src/                 # React pages, layouts, components, and API clients
+│   ├── package.json
+│   ├── vite.config.js
+│   └── vercel.json          # SPA route rewrite
+└── backend/
+    ├── config/              # Database helper (not used by current server entry point)
+    ├── controllers/
+    ├── middleware/
+    ├── models/
+    ├── routes/
+    ├── package.json
+    └── server.js            # Express entry point
+```
 
-   Create a \`.env.local\` file in the root directory and add any necessary variables. Refer to the repository documentation for details.
+There is no root `package.json`; install and run each application from its own directory.
 
----
+## Prerequisites
 
-## Usage 🚀
+- Node.js **18.12+** or **20.9+** and npm.
+- A MongoDB database and connection URI.
+- For the relevant integrations: a Google Gemini API key and Cloudinary credentials.
 
-### Development Mode
+## Install and run locally
 
-To start the development server:
+### 1. Configure the backend
 
-\`\`\`bash
+Create `backend/.env`:
+
+```dotenv
+PORT=5000
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>/<database>
+JWT_SECRET=replace-with-a-long-random-secret
+API_KEY=your-google-generative-ai-key
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-cloudinary-api-key
+CLOUDINARY_API_SECRET=your-cloudinary-api-secret
+```
+
+`MONGODB_URI` and `JWT_SECRET` are needed for the core database and authentication flows. `API_KEY` is used for backend Gemini image analysis. The three Cloudinary variables are needed for image and certificate-proof uploads. If an integration is not configured, its related feature will not work.
+
+Install dependencies and start the API:
+
+```bash
+cd backend
+npm ci
 npm run dev
-# or
-yarn dev
-\`\`\`
+```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
+The development command uses Nodemon. To run without automatic restarts, use `npm start`. The API listens on `http://localhost:5000` unless `PORT` is set.
 
-### Production Build
+### 2. Configure the frontend
 
-Build and start the application in production mode:
+Create `frontend/.env.local`:
 
-\`\`\`bash
-npm run build
+```dotenv
+VITE_API_URL=http://localhost:5000/api
+VITE_API_BASE_URL=http://localhost:5000/api
+VITE_GEMINI_API_KEY=your-google-generative-ai-key
+```
+
+Both API URL variables are currently used by different parts of the app, so set them to the same API base URL, including `/api`. The Gemini key is used by the browser-side Monitoring and Analysis pages.
+
+Install dependencies and start Vite in another terminal:
+
+```bash
+cd frontend
+npm ci
 npm run start
-# or
-yarn build
-yarn start
-\`\`\`
+```
 
----
+Open the URL Vite prints (usually `http://localhost:5173`). To make a production build locally:
 
-## Project Structure 📁
+```bash
+npm run build
+npm run preview -- --host 0.0.0.0
+```
 
-An overview of the project structure:
+The build is written to `frontend/dist`; preview usually listens on port `4173`.
 
-\`\`\`
-carbontrack_1/
-├── components/          # Reusable React components
-├── pages/               # Page components (for Next.js or similar frameworks)
-│   └── index.js         # Main landing page
-├── public/              # Static assets (images, fonts, etc.)
-├── styles/              # Global and component-specific styles
-├── utils/               # Utility functions and helpers
-├── .env.example         # Example configuration file for environment variables
-├── package.json         # Project metadata and dependencies
-└── README.md            # This file
-\`\`\`
+## Environment variables
 
----
+Set frontend `VITE_` variables at build time. Vite embeds them in the generated JavaScript, where users can inspect them. Never put private server credentials in a frontend variable.
 
-## Contributing 🤝
+| Variable | Application | Required for / purpose |
+| --- | --- | --- |
+| `MONGODB_URI` | Backend | Required for the active server's MongoDB connection. |
+| `JWT_SECRET` | Backend | Required for signing and verifying authentication tokens. Use a strong, private value. |
+| `PORT` | Backend | Optional. Defaults to `5000`; set to the port provided by the deployment platform. |
+| `API_KEY` | Backend | Google Generative AI key used in backend product-image analysis. |
+| `CLOUDINARY_CLOUD_NAME` | Backend | Cloudinary account name used for uploads. |
+| `CLOUDINARY_API_KEY` | Backend | Cloudinary API key used for uploads. |
+| `CLOUDINARY_API_SECRET` | Backend | Private Cloudinary API secret used for uploads. |
+| `VITE_API_URL` | Frontend | API base for auth, dashboard, certificate, and admin requests. Include `/api`. |
+| `VITE_API_BASE_URL` | Frontend | API base for profile and organization requests. Include `/api`. |
+| `VITE_GEMINI_API_KEY` | Frontend | Gemini key for direct browser-side calls in Monitoring and Analysis. This key is public in a client build. |
+| `VITE_BACKEND_URL` | Vite config | Optional development proxy target in `vite.config.js`. Current page code uses the explicit API URLs above. The Vite config reads this from `process.env`; setting it only in a Vite `.env` file may not populate that config value. |
 
-Contributions are welcome! To contribute:
+The repository also contains `backend/config/db.js`, which reads `MONGO_URI`, but the active `backend/server.js` does not import that helper and instead connects with `MONGODB_URI`. Set `MONGODB_URI` for the server as currently written.
 
-1. **Fork the repository.**
-2. **Create a new branch:**
+`GCP_PROJECT_ID` and `GOOGLE_APPLICATION_CREDENTIALS` are read by a Vertex AI helper in the backend, but that helper currently has no call sites. They are not required by the active routes. A Supabase client file refers to `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, but it is not imported by the app and the Supabase package is not listed as a frontend dependency; these variables are not part of the current setup.
 
-   \`\`\`bash
-   git checkout -b feature/your-feature-name
-   \`\`\`
+## Build and deploy
 
-3. **Commit your changes:**
+Deploy the frontend and backend as separate services.
 
-   \`\`\`bash
-   git commit -m "Add new feature or fix bug"
-   \`\`\`
+### Frontend on Vercel or another static host
 
-4. **Push to your branch:**
+The repository includes `frontend/vercel.json`, which rewrites all paths to `/index.html` so React Router routes continue to work on refresh. Configure the frontend project with:
 
-   \`\`\`bash
-   git push origin feature/your-feature-name
-   \`\`\`
+- **Root directory:** `frontend`
+- **Install command:** `npm ci`
+- **Build command:** `npm run build`
+- **Output directory:** `dist`
+- **Build environment:** set `VITE_API_URL`, `VITE_API_BASE_URL`, and `VITE_GEMINI_API_KEY`
 
-5. **Open a Pull Request** on GitHub.
+Use the deployed backend URL for both API base variables, for example `https://api.example.com/api`. Frontend environment variables are compiled into the static build, so redeploy after changing them.
 
-For major changes, please open an issue first to discuss your ideas.
+### Backend on a Node.js host
 
----
+Configure a separate Node.js service with:
 
-## License 📄
+- **Root directory:** `backend`
+- **Install command:** `npm ci`
+- **Build command:** none (there is no backend build script)
+- **Start command:** `npm start`
+- **Environment:** `MONGODB_URI`, `JWT_SECRET`, `PORT`, and any integration credentials required by enabled features
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+The host must provide outbound access to MongoDB and to configured Google/Cloudinary services. The API currently uses `cors()` with its defaults: it allows requests from any origin and does not enable credentialed CORS requests. There is no CORS-origin environment variable in the current implementation.
 
----
+## API overview
 
-## Acknowledgements 🙏
+All routes are mounted under `/api`:
 
-- [Vercel](https://vercel.com) for hosting and deployment.
-- The open-source community for the tools and libraries that made this project possible.
-- Environmental data providers and initiatives like [Our World in Data](https://ourworldindata.org) for inspiring the project.
+| Base path | Purpose |
+| --- | --- |
+| `/api/auth` | Registration, login, and authenticated profile lookup. |
+| `/api/analysis` | Authenticated product image analysis and analysis history. Image uploads are limited to 10 MB and image MIME types. |
+| `/api/certificates` | Certificate listing, proof upload, goal verification, and certificate download. |
+| `/api` | User data, user comparison data, and department sample data. |
+| `/api/vouchers` | List, offer, and claim vouchers. |
+| `/api/departments` | List, create, delete, and export department data. |
 
----
+Most routes require `Authorization: Bearer <token>`. The API has no separate health-check route defined in the current server.
 
-*Happy coding, and let's work together to track and reduce carbon emissions!*`;
+## Troubleshooting
 
-      // Convert the content to Base64
-      const base64Content = btoa(unescape(encodeURIComponent(readmeContent)));
-      // Set the href attribute to the data URL with the encoded content
-      document.getElementById('download-link').href = 'data:text/markdown;charset=utf-8;base64,' + base64Content;
-    </script>
-  </body>
-</html>
+- **Browser calls go to localhost in production:** set both `VITE_API_URL` and `VITE_API_BASE_URL` to the deployed API origin plus `/api`, then rebuild/redeploy the frontend.
+- **MongoDB connection errors:** check `MONGODB_URI`, database network access rules, and credentials. The active server logs a connection error but still starts listening, so a running process does not guarantee database connectivity.
+- **Authentication fails or tokens are rejected:** ensure `JWT_SECRET` is set and remains consistent across backend restarts/deployments.
+- **Gemini features fail:** check the relevant key: `VITE_GEMINI_API_KEY` for browser-side Monitoring/Analysis, or backend `API_KEY` for server-side image analysis.
+- **Uploads fail:** check all three Cloudinary values and confirm the service is reachable.
+- **Refreshing a nested frontend URL returns 404:** configure the static host to return `index.html` for application routes. The supplied Vercel rewrite handles this for Vercel deployments.
